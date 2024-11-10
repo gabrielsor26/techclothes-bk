@@ -101,4 +101,30 @@ public class ProductoDAO {
             stmt.executeUpdate();
         }
     }
+
+    // ProductoDAO.java
+    public List<Producto> listarProductosPorCategoria(String categoriaNombre) throws SQLException {
+        List<Producto> productos = new ArrayList<>();
+        String query = "SELECT * FROM productos p JOIN categorias c ON p.categoria_id = c.id WHERE c.nombre = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, categoriaNombre);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Producto producto = new Producto(
+                            rs.getInt("id"),
+                            rs.getString("nombre"),
+                            rs.getString("descripcion"),
+                            rs.getDouble("precio"),
+                            rs.getString("imagen_url"),
+                            new Categoria(rs.getInt("categoria_id"), rs.getString("nombre")), // Crear la categoría
+                            rs.getInt("stock")
+                    );
+                    productos.add(producto);
+                }
+            }
+        }
+        return productos;
+    }
+
 }

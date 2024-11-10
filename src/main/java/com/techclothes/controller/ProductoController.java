@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import java.util.List;
 
 @WebServlet(name = "ProductoController", urlPatterns = {"/ProductoController"})
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
@@ -47,6 +48,7 @@ public class ProductoController extends HttpServlet {
     private void handleRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
+        String view = request.getParameter("view");
 
         try {
             switch (action == null ? "" : action) {
@@ -61,7 +63,11 @@ public class ProductoController extends HttpServlet {
                     break;
                 case "listar":
                 default:
-                    listarProductos(request, response);
+                    if ("catalogo".equals(view)) {
+                        listarProductosParaCatalogo(request, response);
+                    } else {
+                        listarProductosParaMantenimiento(request, response);
+                    }
                     break;
             }
         } catch (SQLException e) {
@@ -69,10 +75,37 @@ public class ProductoController extends HttpServlet {
         }
     }
 
-    private void listarProductos(HttpServletRequest request, HttpServletResponse response)
+    private void listarProductosParaCatalogo(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
-        request.setAttribute("productos", productoDAO.listarProductos());
-        request.setAttribute("categorias", categoriaDAO.listarCategorias());
+        String categoria = request.getParameter("categoria");
+        List<Producto> productos;
+
+        if (categoria != null && !categoria.isEmpty() && !"Todos".equals(categoria)) {
+            System.out.println("Filtrando productos por categoría: " + categoria);
+            productos = productoDAO.listarProductosPorCategoria(categoria); // Asegúrate que este método esté funcionando
+        } else {
+            System.out.println("Listando todos los productos");
+            productos = productoDAO.listarProductos();
+        }
+
+        // Verifica si hay productos
+        if (productos == null || productos.isEmpty()) {
+            System.out.println("No se encontraron productos para mostrar.");
+        } else {
+            System.out.println("Productos obtenidos: " + productos.size());
+        }
+
+        request.setAttribute("productos", productos);
+        request.getRequestDispatcher("views/catalogo.jsp").forward(request, response);
+    }
+
+    private void listarProductosParaMantenimiento(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, SQLException {
+        List<Producto> productos = productoDAO.listarProductos();
+        List<Categoria> categorias = categoriaDAO.listarCategorias();
+
+        request.setAttribute("productos", productos);
+        request.setAttribute("categorias", categorias);
         request.getRequestDispatcher("views/mantenimiento.jsp").forward(request, response);
     }
 
@@ -91,12 +124,12 @@ public class ProductoController extends HttpServlet {
         producto.setNombre(nombre);
         producto.setDescripcion(descripcion);
         producto.setPrecio(precio);
-        producto.setCategoria(categoria);  // Asignar la categoría al producto
+        producto.setCategoria(categoria);
         producto.setStock(stock);
         producto.setImagenUrl(rutaImagen);
 
         productoDAO.agregarProducto(producto);
-        response.sendRedirect("ProductoController?action=listar&success=true");
+        response.sendRedirect("ProductoController?action=listar&view=mantenimiento&success=true");
     }
 
     private void editarProducto(HttpServletRequest request, HttpServletResponse response)
@@ -114,7 +147,7 @@ public class ProductoController extends HttpServlet {
             producto.setNombre(nombre);
             producto.setDescripcion(descripcion);
             producto.setPrecio(precio);
-            producto.setCategoria(categoria);  // Asignar la categoría actualizada
+            producto.setCategoria(categoria);
             producto.setStock(stock);
 
             String rutaImagen = guardarImagen(request);
@@ -125,19 +158,18 @@ public class ProductoController extends HttpServlet {
             productoDAO.actualizarProducto(producto);
         }
 
-        response.sendRedirect("ProductoController?action=listar&edited=true");
+        response.sendRedirect("ProductoController?action=listar&view=mantenimiento&edited=true");
     }
 
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response) throws IOException, SQLException {
-        // Obtener el parámetro "id"
         String idStr = request.getParameter("id");
         if (idStr == null || idStr.isEmpty()) {
             throw new IllegalArgumentException("El parámetro 'id' es requerido.");
         }
 
-        int id = Integer.parseInt(idStr);  // convertir a entero solo si es válido
+        int id = Integer.parseInt(idStr);
         productoDAO.eliminarProducto(id);
-        response.sendRedirect("ProductoController?action=listar&deleted=true");
+        response.sendRedirect("ProductoController?action=listar&view=mantenimiento&deleted=true");
     }
 
     private String guardarImagen(HttpServletRequest request) throws IOException, ServletException {

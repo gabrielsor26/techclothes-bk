@@ -41,10 +41,10 @@
                 <a href="index.html" class="text-3xl font-bold text-white">TechClothes</a>
                 <div>
                     <a href="index.jsp" class="text-white mx-3 hover:text-secondary">Inicio</a>
-                    <a href="catalogo.html" class="text-white mx-3 hover:text-secondary">Catálogo</a>
+                    <a href="ProductoController?action=listar&view=catalogo" class="text-white mx-3 hover:text-secondary">Catálogo</a>
                     <a href="carrito.html" class="text-white mx-3 hover:text-secondary">Carrito</a>
                     <a href="cuenta.html" class="text-white mx-3 hover:text-secondary">Mi cuenta</a>
-                    <a href="ProductoController?action=listar" class="text-white mx-3 hover:text-secondary">Mantenimiento</a>
+                    <a href="ProductoController?action=listar&view=mantenimiento" class="text-white mx-3 hover:text-secondary">Mantenimiento</a>
                 </div>
             </div>
         </nav>
