@@ -20,7 +20,7 @@ public class ProductoDAO {
     public List<Producto> listarProductos() throws SQLException {
         List<Producto> productos = new ArrayList<>();
         String query = "SELECT p.*, c.nombre AS categoriaNombre FROM productos p "
-                + "JOIN categorias c ON p.categoria_id = c.id";
+                + "JOIN categorias c ON p.categoria_id = c.id ORDER BY p.id DESC";
 
         try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {

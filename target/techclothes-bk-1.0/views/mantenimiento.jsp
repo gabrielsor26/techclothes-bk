@@ -11,16 +11,19 @@
         <!-- Tailwind CSS y daisyUI CDN -->
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+        <!-- Material Icons -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <script>
             tailwind.config = {
                 theme: {
                     extend: {
                         colors: {
-                            background: '#FCFBFA',
-                            primary: '#1F7BDD',
-                            secondary: '#98C8ED',
-                            accent: '#8595BF',
-                            hoverAccent: '#7396D0',
+                            background: '#F1F5F9',
+                            primary: '#1E3A8A', // Azul oscuro
+                            primaryLight: '#3B82F6', // Azul claro
+                            secondary: '#64748B', // Gris azulado para fondos de perfil
+                            accent: '#93C5FD', // Azul claro para hover
+                            hoverAccent: '#2563EB',
                         }
                     }
                 },
@@ -36,106 +39,178 @@
 
     <body class="theme-light bg-background text-gray-900 font-sans">
 
-        <nav class="bg-primary p-4 shadow-lg">
+        <header class="bg-primary p-4 shadow-lg">
             <div class="container mx-auto flex justify-between items-center">
                 <a href="index.html" class="text-3xl font-bold text-white">TechClothes</a>
-                <div>
+                <div class="hidden md:flex space-x-4">
                     <a href="index.jsp" class="text-white mx-3 hover:text-secondary">Inicio</a>
                     <a href="ProductoController?action=listar&view=catalogo" class="text-white mx-3 hover:text-secondary">Catálogo</a>
                     <a href="carrito.html" class="text-white mx-3 hover:text-secondary">Carrito</a>
                     <a href="cuenta.html" class="text-white mx-3 hover:text-secondary">Mi cuenta</a>
                     <a href="ProductoController?action=listar&view=mantenimiento" class="text-white mx-3 hover:text-secondary">Mantenimiento</a>
                 </div>
+                <!-- Menú de hamburguesa para móviles -->
+                <button id="menuBtn" class="md:hidden material-icons text-white">menu</button>
             </div>
-        </nav>
+        </header>
 
-        <section class="py-10">
-            <div class="container mx-auto">
-                <h2 class="text-4xl font-bold text-primary mb-8 text-center">Mantenimiento de Productos</h2>
 
-                <!-- Formulario de Producto -->
-                <div class="bg-white p-8 rounded-lg shadow-md mb-12">
-                    <h3 class="text-2xl font-semibold mb-4">Agregar Producto</h3>
-                    <form id="productForm" action="ProductoController?action=agregar" method="post" enctype="multipart/form-data">
-                        <div class="mb-4">
-                            <label for="nombre" class="block text-gray-700 font-medium mb-2">Nombre del Producto</label>
-                            <input type="text" name="nombre" class="input input-bordered w-full bg-white text-black" placeholder="Ej. Camiseta de JavaScript" required>
-                        </div>
 
-                        <div class="mb-4">
-                            <label for="descripcion" class="block text-gray-700 font-medium mb-2">Descripción</label>
-                            <textarea name="descripcion" class="textarea textarea-bordered w-full bg-white text-black" placeholder="Descripción del producto" rows="2" required minlength="10"></textarea>
-                        </div>
+        <!-- Contenedor principal con barra lateral y contenido -->
+        <div class="flex h-screen overflow-hidden">
 
-                        <div class="mb-4">
-                            <label for="precio" class="block text-gray-700 font-medium mb-2">Precio</label>
-                            <input type="number" name="precio" class="input input-bordered w-full bg-white text-black" placeholder="Ej. 20.00" required min="1">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="categoria" class="block text-gray-700 font-medium mb-2">Categoría</label>
-                            <select name="categoria" class="select select-bordered w-full bg-white text-black" required>
-                                <option value="">Seleccione una categoría</option>
-                                <c:forEach var="categoria" items="${categorias}">
-                                    <option value="${categoria.id}">${categoria.nombre}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="stock" class="block text-gray-700 font-medium mb-2">Stock</label>
-                            <input type="number" name="stock" class="input input-bordered w-full bg-white text-black" placeholder="Ej. 100" required min="1">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="imagen_url" class="block text-gray-700 font-medium mb-2">Subir Imagen</label>
-                            <input type="file" name="imagen_url" class="file-input file-input-bordered file-input-primary w-full" accept="image/*" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-lg btn-primary w-full mb-2" onclick="return validarFormulario()">Guardar Producto</button>
-                    </form>
+            <!-- Barra de navegación lateral -->
+            <aside
+                class="bg-primary text-white w-64 space-y-6 px-4 py-8 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-200 ease-in-out z-50"
+                id="sidebar">
+                <div class="text-center">
+                    <img src="https://via.placeholder.com/300" alt="Admin Avatar" class="w-20 h-20 mx-auto rounded-full mb-2 shadow-lg">
+                    <h2 class="text-lg font-semibold">Admin TechClothes</h2>
+                    <p class="text-sm text-primaryLight">admin@techclothes.com</p>
                 </div>
 
-                <!-- Lista de Productos -->
-                <div>
-                    <h3 class="text-2xl font-semibold mb-4">Lista de Productos</h3>
-                    <div class="overflow-x-auto">
-                        <table class="table w-full">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Imagen</th>
-                                    <th>Nombre</th>
-                                    <th>Descripción</th>
-                                    <th>Precio</th>
-                                    <th>Categoría</th>
-                                    <th>Stock</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach var="producto" items="${productos}">
-                                    <tr class="hover:bg-gray-100">
-                                        <th>${producto.id}</th>
-                                        <td><img src="${producto.imagenUrl}" alt="Imagen de ${producto.nombre}" class="w-20 h-20 object-cover rounded-md"></td>
-                                        <td>${producto.nombre}</td>
-                                        <td>${producto.descripcion}</td>
-                                        <td>S/. ${producto.precio}</td>
-                                        <td>${producto.categoria.nombre}</td>
-                                        <td>${producto.stock}</td>
-                                        <td>
-                                            <button onclick="abrirModalEditar(${producto.id}, '${producto.nombre}', '${producto.descripcion}', ${producto.precio}, ${producto.stock}, ${producto.categoria.id}, '${producto.imagenUrl}')" class="btn btn-sm btn-secondary">Editar</button>
-                                            <button onclick="eliminarProducto(${producto.id}, '${producto.nombre}')" class="btn btn-sm btn-error">Eliminar</button>
+                <!-- Navegación lateral -->
+                <nav class="flex-1 mt-4">
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#"  class="flex items-center space-x-3 px-4 py-2 hover:bg-hoverAccent rounded-lg transition">
+                                <span class="material-icons">dashboard</span>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#mantenimiento" class="flex items-center space-x-3 px-4 py-2 hover:bg-hoverAccent rounded-lg transition">
+                                <span class="material-icons">inventory_2</span>
+                                <span>Productos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center space-x-3 px-4 py-2 hover:bg-hoverAccent rounded-lg transition">
+                                <span class="material-icons">group</span>
+                                <span>Usuarios</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center space-x-3 px-4 py-2 hover:bg-hoverAccent rounded-lg transition">
+                                <span class="material-icons">shopping_cart</span>
+                                <span>Pedidos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"  class="flex items-center space-x-3 px-4 py-2 hover:bg-hoverAccent rounded-lg transition">
+                                <span class="material-icons">assessment</span>
+                                <span>Reportes</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center space-x-3 px-4 py-2 hover:bg-hoverAccent rounded-lg transition">
+                                <span class="material-icons">settings</span>
+                                <span>Configuración</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
 
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="px-4">
+                    <button class="btn bg-accent text-primary w-full">Cerrar Sesión</button>
                 </div>
+            </aside>
+
+            <!-- Contenido principal -->
+            <div class="flex-1 flex flex-col">
+                <main class="flex-1 p-8 overflow-auto">
+
+                    <section id="mantenimiento" class="py-2">
+                        <div class="container mx-auto">
+                            <h2 class="text-4xl font-bold text-primary mb-8 text-center">Mantenimiento de Productos</h2>
+                            <!-- Formulario de Producto -->
+                            <div class="bg-white p-8 rounded-lg shadow-md mb-12">
+                                <h3 class="text-2xl font-semibold mb-4">Agregar Producto</h3>
+                                <form id="productForm" action="ProductoController?action=agregar" method="post" enctype="multipart/form-data">
+                                    <div class="mb-4">
+                                        <label for="nombre" class="block text-gray-700 font-medium mb-2">Nombre del Producto</label>
+                                        <input type="text" name="nombre" class="input input-bordered w-full bg-white text-black" placeholder="Ej. Camiseta de JavaScript" required>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="descripcion" class="block text-gray-700 font-medium mb-2">Descripción</label>
+                                        <textarea name="descripcion" class="textarea textarea-bordered w-full bg-white text-black" placeholder="Descripción del producto" rows="2" required minlength="10"></textarea>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="precio" class="block text-gray-700 font-medium mb-2">Precio</label>
+                                        <input type="number" name="precio" class="input input-bordered w-full bg-white text-black" placeholder="Ej. 20.00" required min="1">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="categoria" class="block text-gray-700 font-medium mb-2">Categoría</label>
+                                        <select name="categoria" class="select select-bordered w-full bg-white text-black" required>
+                                            <option value="">Seleccione una categoría</option>
+                                            <c:forEach var="categoria" items="${categorias}">
+                                                <option value="${categoria.id}">${categoria.nombre}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="stock" class="block text-gray-700 font-medium mb-2">Stock</label>
+                                        <input type="number" name="stock" class="input input-bordered w-full bg-white text-black" placeholder="Ej. 100" required min="1">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="imagen_url" class="block text-gray-700 font-medium mb-2">Subir Imagen</label>
+                                        <input type="file" name="imagen_url" class="file-input file-input-bordered file-input-primary w-full" accept="image/*" required>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-lg btn-primary w-full mb-2" onclick="return validarFormulario()">Guardar Producto</button>
+                                </form>
+                            </div>
+
+                            <!-- Lista de Productos -->
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4">Lista de Productos</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="table w-full">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Imagen</th>
+                                                <th>Nombre</th>
+                                                <th>Descripción</th>
+                                                <th>Precio</th>
+                                                <th>Categoría</th>
+                                                <th>Stock</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach var="producto" items="${productos}">
+                                                <tr class="hover:bg-gray-100">
+                                                    <th>${producto.id}</th>
+                                                    <td><img src="${producto.imagenUrl}" alt="Imagen de ${producto.nombre}" class="w-20 h-20 object-cover rounded-md"></td>
+                                                    <td>${producto.nombre}</td>
+                                                    <td>${producto.descripcion}</td>
+                                                    <td>S/. ${producto.precio}</td>
+                                                    <td>${producto.categoria.nombre}</td>
+                                                    <td>${producto.stock}</td>
+                                                    <td>
+                                                        <button onclick="abrirModalEditar(${producto.id}, '${producto.nombre}', '${producto.descripcion}', ${producto.precio}, ${producto.stock}, ${producto.categoria.id}, '${producto.imagenUrl}')" class="btn btn-sm btn-secondary">Editar</button>
+                                                        <button onclick="eliminarProducto(${producto.id}, '${producto.nombre}')" class="btn btn-sm btn-error">Eliminar</button>
+
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </main>
             </div>
-        </section>
+        </div>
+
 
         <!-- Modal de Edición -->
         <input type="checkbox" id="editModal" class="modal-toggle">
@@ -188,6 +263,18 @@
                 </form>
             </div>
         </div>
+
+        <!-- JavaScript para el menú de hamburguesa -->
+        <script>
+            const menuBtn = document.getElementById("menuBtn");
+            const sidebar = document.getElementById("sidebar");
+
+            menuBtn.addEventListener("click", () => {
+                sidebar.classList.toggle("-translate-x-full");
+            });
+
+        </script>
+
 
         <script>
 
