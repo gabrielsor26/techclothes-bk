@@ -34,6 +34,7 @@
         </script>
         <!-- SweetAlert2 CDN -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.slim.js" integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" crossorigin="anonymous"></script>
 
     </head>
 
@@ -41,19 +42,15 @@
 
         <header class="bg-primary p-4 shadow-lg">
             <div class="container mx-auto flex justify-between items-center">
-                <a href="index.html" class="text-3xl font-bold text-white">TechClothes</a>
+                <a href="index.jsp" class="text-3xl font-bold text-white">TechClothes</a>
                 <div class="hidden md:flex space-x-4">
-                    <a href="index.jsp" class="text-white mx-3 hover:text-secondary">Inicio</a>
-                    <a href="ProductoController?action=listar&view=catalogo" class="text-white mx-3 hover:text-secondary">Catálogo</a>
-                    <a href="carrito.html" class="text-white mx-3 hover:text-secondary">Carrito</a>
-                    <a href="cuenta.html" class="text-white mx-3 hover:text-secondary">Mi cuenta</a>
-                    <a href="ProductoController?action=listar&view=mantenimiento" class="text-white mx-3 hover:text-secondary">Mantenimiento</a>
+                    <a href="cuenta.html" class="text-white text-lg mx-3 hover:text-secondary">Mi cuenta</a>
                 </div>
                 <!-- Menú de hamburguesa para móviles -->
-                <button id="menuBtn" class="md:hidden material-icons text-white">menu</button>
+                <button id="menuBtn" class="text-lg md:hidden material-icons text-white">menu</button>
             </div>
         </header>
-
+ 
 
 
         <!-- Contenedor principal con barra lateral y contenido -->
@@ -64,7 +61,7 @@
                 class="bg-primary text-white w-64 space-y-6 px-4 py-8 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-200 ease-in-out z-50"
                 id="sidebar">
                 <div class="text-center">
-                    <img src="https://via.placeholder.com/300" alt="Admin Avatar" class="w-20 h-20 mx-auto rounded-full mb-2 shadow-lg">
+                    <img src="https://avatar.iran.liara.run/public/48  " alt="Admin Avatar" class="w-20 h-20 mx-auto rounded-full mb-2 shadow-lg">
                     <h2 class="text-lg font-semibold">Admin TechClothes</h2>
                     <p class="text-sm text-primaryLight">admin@techclothes.com</p>
                 </div>
@@ -79,7 +76,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#mantenimiento" class="flex items-center space-x-3 px-4 py-2 hover:bg-hoverAccent rounded-lg transition">
+                            <a href="ProductoController?action=listar&view=mantenimiento" class="flex items-center space-x-3 px-4 py-2 hover:bg-hoverAccent rounded-lg transition">
                                 <span class="material-icons">inventory_2</span>
                                 <span>Productos</span>
                             </a>
@@ -266,21 +263,14 @@
 
         <!-- JavaScript para el menú de hamburguesa -->
         <script>
-            const menuBtn = document.getElementById("menuBtn");
-            const sidebar = document.getElementById("sidebar");
+            $(document).ready(function () {
+                // Menú de hamburguesa
+                $("#menuBtn").click(function () {
+                    $("#sidebar").toggleClass("-translate-x-full");
+                });
 
-            menuBtn.addEventListener("click", () => {
-                sidebar.classList.toggle("-translate-x-full");
-            });
-
-        </script>
-
-
-        <script>
-
-            document.addEventListener("DOMContentLoaded", function () {
+                // Mostrar alertas según los parámetros en la URL
                 const urlParams = new URLSearchParams(window.location.search);
-
                 if (urlParams.get("success") === "true") {
                     Swal.fire({
                         title: "Producto agregado",
@@ -305,20 +295,17 @@
                 }
             });
 
+            // Abrir modal de edición
             function abrirModalEditar(id, nombre, descripcion, precio, stock, categoriaId, imagenUrl) {
-                document.getElementById('editId').value = id;
-                document.getElementById('editNombre').value = nombre;
-                document.getElementById('editDescripcion').value = descripcion;
-                document.getElementById('editPrecio').value = precio;
-                document.getElementById('editStock').value = stock;
+                $('#editId').val(id);
+                $('#editNombre').val(nombre);
+                $('#editDescripcion').val(descripcion);
+                $('#editPrecio').val(precio);
+                $('#editStock').val(stock);
+                $('#editCategoria').val(categoriaId);
+                $('#editImagen').data('currentImage', imagenUrl);
 
-                // Establecer el valor de la categoría seleccionada
-                document.getElementById('editCategoria').value = categoriaId;
-
-                document.getElementById('editImagen').dataset.currentImage = imagenUrl;
-
-                // Abrir el modal
-                document.getElementById('editModal').checked = true;
+                $('#editModal').prop('checked', true); // Abrir el modal
             }
 
             // SweetAlert2 para confirmar el guardado de un nuevo producto
@@ -333,7 +320,7 @@
                     confirmButtonColor: '#1F7BDD'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        document.getElementById('productForm').submit();
+                        $('#productForm').submit();
                         Swal.fire('Guardado', 'El producto ha sido agregado exitosamente.', 'success');
                     }
                 });
@@ -351,27 +338,22 @@
                     confirmButtonColor: '#1F7BDD'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        document.getElementById('editForm').submit(); // Envía el formulario de edición
+                        $('#editForm').submit();
                     }
                 });
             }
 
+            // Confirmación de eliminación de producto con SweetAlert2
             function eliminarProducto(idProducto, nombreProducto) {
-                console.log("ID del producto recibido:", idProducto);
-                console.log("Nombre del producto recibido:", nombreProducto);
-
                 if (!idProducto || !nombreProducto) {
                     console.error("Datos no válidos:", idProducto, nombreProducto);
                     alert("No se puede eliminar el producto porque los datos son inválidos.");
                     return;
                 }
 
-                // Verifica si la interpolación muestra el resultado esperado
-                const textoAlerta = 'Eliminarás el producto "' + nombreProducto + '". Esta acción no se puede deshacer.';
-
                 Swal.fire({
                     title: '¿Estás seguro?',
-                    text: textoAlerta, // Cambiado a concatenación para verificar
+                    text: 'Eliminarás el producto "' + nombreProducto + '". Esta acción no se puede deshacer.',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
@@ -379,22 +361,21 @@
                     confirmButtonText: 'Sí, eliminar',
                     cancelButtonText: 'Cancelar'
                 }).then((result) => {
-                    console.log("Confirmación recibida:", result.isConfirmed);
                     if (result.isConfirmed) {
                         const url = 'ProductoController?action=eliminar&id=' + idProducto;
-                        console.log("URL generada:", url); // Confirmar la URL antes de redirigir
-                        window.location.href = url + '&deleted=true';  // Agrega el parámetro "deleted" para mostrar el mensaje
+                        window.location.href = url + '&deleted=true';
                     }
                 });
             }
 
+            // Validación del formulario
             function validarFormulario() {
-                const nombre = document.getElementsByName("nombre")[0].value.trim();
-                const descripcion = document.getElementsByName("descripcion")[0].value.trim();
-                const precio = document.getElementsByName("precio")[0].value;
-                const categoria = document.getElementsByName("categoria")[0].value;
-                const stock = document.getElementsByName("stock")[0].value;
-                const imagen = document.getElementsByName("imagen_url")[0].value;
+                const nombre = $("input[name='nombre']").val().trim();
+                const descripcion = $("textarea[name='descripcion']").val().trim();
+                const precio = $("input[name='precio']").val();
+                const categoria = $("select[name='categoria']").val();
+                const stock = $("input[name='stock']").val();
+                const imagen = $("input[name='imagen_url']").val();
 
                 if (!nombre || nombre.length < 3) {
                     Swal.fire("Error", "El nombre del producto debe tener al menos 3 caracteres.", "error");
@@ -438,7 +419,7 @@
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#1F7BDD'
                 }).then(() => {
-                    document.getElementById('productForm').reset();
+                    $('#productForm')[0].reset();
                 });
             }
         </script>
